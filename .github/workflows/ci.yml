@@ -7,12 +7,15 @@ on:
   pull_request:
 
 # This is the ceiling for every called workflow: a reusable workflow can never
-# exceed what its caller grants. gitleaks and CodeQL both upload SARIF, so
-# `security-events: write` has to be granted here or their uploads are
-# downgraded to read-only and fail.
+# exceed what its caller grants. Each entry below is needed by a specific callee,
+# and a missing one fails the job rather than degrading quietly:
+#   security-events: write  -> gitleaks and CodeQL upload SARIF
+#   pull-requests: read     -> the release gate lists open pull requests
+#   actions: read           -> CodeQL
 permissions:
   contents: read
   actions: read
+  pull-requests: read
   security-events: write
 
 # No top-level `concurrency` group on purpose. Each called workflow declares its
@@ -20,6 +23,14 @@ permissions:
 # the call fail at dispatch with zero jobs and no log.
 
 jobs:
+  # Job name matters: the reusable workflow's job is also called `release-gate`,
+  # and the check context GitHub records is "<caller job> / <called job>". Naming
+  # the caller `release-gate` is what produces the `release-gate / release-gate`
+  # context that the branch ruleset requires.
+  release-gate:
+    if: github.event_name == 'pull_request'
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-qa-lock-check.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
+
   security:
     uses: sca-templates/CI-CD-Templates/.github/workflows/shared-security-scan.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
 

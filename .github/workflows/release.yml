@@ -1,0 +1,25 @@
+---
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# The called workflow mints its own GitHub App token, so it only needs to read
+# this repository. It is declared here because a reusable workflow can never
+# exceed the permissions its caller grants.
+permissions:
+  contents: read
+
+# No `concurrency` group: `shared-release-flow.yml` declares its own
+# (`release-${{ github.ref }}`) and must never be cancelled by a re-run.
+
+jobs:
+  release:
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-release-flow.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
+    with:
+      release-type: node
+    secrets:
+      APP_ID: ${{ secrets.APP_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+      RELEASE_GPG_PRIVATE_KEY: ${{ secrets.RELEASE_GPG_PRIVATE_KEY }}
