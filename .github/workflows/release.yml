@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   release:
-    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-release-flow.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-release-flow.yml@47b9f3cb040adb8095585511a78c0f3a15079489 # v3.3.1
     with:
       release-type: node
     secrets:
