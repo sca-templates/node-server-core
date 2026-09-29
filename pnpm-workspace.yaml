@@ -1,5 +1,8 @@
-packages:
-  - packages/*
-
+# This repository is a single package, not a workspace: there is no `packages:`
+# key on purpose. Declaring `packages/*` would advertise an empty workspace.
+#
+# `ignoredBuiltDependencies` stays because esbuild's postinstall (itself a binary
+# download) must not run as an arbitrary build script under pnpm's approval model.
+# esbuild is pinned via `pnpm.overrides` in package.json to clear GHSA-g7r4-m6w7-qqqr.
 ignoredBuiltDependencies:
   - esbuild
