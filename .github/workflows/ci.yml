@@ -1,0 +1,40 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# This is the ceiling for every called workflow: a reusable workflow can never
+# exceed what its caller grants. gitleaks and CodeQL both upload SARIF, so
+# `security-events: write` has to be granted here or their uploads are
+# downgraded to read-only and fail.
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+# No top-level `concurrency` group on purpose. Each called workflow declares its
+# own (`security-…`, `stack-node-ts-…`); a caller reusing the same group makes
+# the call fail at dispatch with zero jobs and no log.
+
+jobs:
+  security:
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-security-scan.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
+
+  codeql:
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-codeql.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
+    with:
+      languages: '["javascript-typescript"]'
+
+  stack:
+    uses: sca-templates/CI-CD-Templates/.github/workflows/stack-node-ts.yml@144996d6e0870c6820ac02a7835faef217f9c2d4 # v3.3.0
+    with:
+      node-version: '22'
+      package-manager: pnpm
+      pnpm-version: '10.18.0'
+      run-lint: true
+      run-format: true
+      run-test: true
+      run-build: true
