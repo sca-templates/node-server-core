@@ -395,3 +395,6 @@ $RECYCLE.BIN/
 0.Project_info
 context/structure.txt
 .codegraph/
+
+# Husky's generated hook dispatcher
+.husky/_
