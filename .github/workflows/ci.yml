@@ -7,16 +7,25 @@ on:
   pull_request:
 
 # This is the ceiling for every called workflow: a reusable workflow can never
-# exceed what its caller grants. Each entry below is needed by a specific callee,
-# and a missing one fails the job rather than degrading quietly:
+# exceed what its caller grants. GitHub validates the declared permissions of
+# *every* job in a called workflow against this ceiling while it builds the run
+# graph, so a missing entry does not fail one job, it kills the whole run before
+# any job is created (conclusion: startup_failure, zero check runs).
 #   security-events: write  -> gitleaks and CodeQL upload SARIF
 #   pull-requests: read     -> the release gate lists open pull requests
 #   actions: read           -> CodeQL
+#   packages: write         -> stack-node-ts.yml's `publish` job declares it.
+#                              That job is gated behind run-publish=false, but
+#                              the grant is still mandatory because validation
+#                              is static. This repo never publishes an image, so
+#                              the grant is pure collateral; see the note in
+#                              CI-CD-Templates/docs/usage.md.
 permissions:
   contents: read
   actions: read
   pull-requests: read
   security-events: write
+  packages: write
 
 # No top-level `concurrency` group on purpose. Each called workflow declares its
 # own (`security-…`, `stack-node-ts-…`); a caller reusing the same group makes

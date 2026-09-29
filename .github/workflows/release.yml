@@ -5,11 +5,15 @@ on:
   push:
     branches: [main]
 
-# The called workflow mints its own GitHub App token, so it only needs to read
-# this repository. It is declared here because a reusable workflow can never
-# exceed the permissions its caller grants.
+# The ceiling for the called workflow. It mints its own GitHub App token for the
+# release work, but `shared-release-flow.yml` also declares an `auto-merge` job
+# with `pull-requests: write`, and GitHub validates the permissions of every job
+# in a called workflow against the caller's grants when it builds the run graph.
+# That job is gated behind auto-merge-release-pr=false, yet omitting the grant
+# fails the entire run at startup (conclusion: startup_failure, zero check runs).
 permissions:
   contents: read
+  pull-requests: write
 
 # No `concurrency` group: `shared-release-flow.yml` declares its own
 # (`release-${{ github.ref }}`) and must never be cancelled by a re-run.
