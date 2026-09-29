@@ -1,0 +1,41 @@
+{
+  "name": "@sca-templates/node-server-core",
+  "description": "Shared core for the organization's Node.js APIs",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sca-templates/node-server-core.git"
+  },
+  "homepage": "https://github.com/sca-templates/node-server-core#readme",
+  "bugs": {
+    "url": "https://github.com/sca-templates/node-server-core/issues"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.2"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    // Target and module system (Node 22, ESM)
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+
+    // Strictness
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Compatibility with bundlers and single-file transpilers
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    // tsc only type-checks; tsup generates the build output
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "test", "tsup.config.ts"]
+}
