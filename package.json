@@ -29,13 +29,26 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:ci": "vitest run",
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.20.4",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-security": "^4.1.0",
+    "eslint-plugin-sonarjs": "^4.2.2",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.0",
     "vitest": "^5.0.2"
   }
 }
