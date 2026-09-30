@@ -1,0 +1,119 @@
+---
+name: Publish
+
+on:
+  # `release`, never `push: tags`. The Release workflow re-pushes the tag to sign
+  # it (`git tag -f -s`), and a tag trigger would fire a second publish for a
+  # version npm has already accepted — which fails hard and turns a successful
+  # release into a red run. The `release` event is not re-emitted by the re-push.
+  release:
+    types: [published]
+  # Manual path: re-publish after rotating NPM_TOKEN, or rehearse the whole
+  # pipeline before the first release exists. `release: published` fires once
+  # and never again, so this is the only way to retry.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to publish, with or without the leading "v" (e.g. v0.1.0)
+        type: string
+        required: true
+      dry-run:
+        description: Build the tarball and print it without contacting npm's write API
+        type: boolean
+        default: false
+
+# The ceiling for this workflow. No `id-token: write` on purpose: npm provenance
+# and npm trusted publishing both authenticate over OIDC, and npm supports
+# neither on self-hosted runners. `vars.RUNS_ON` is `self-hosted` for this org
+# (one shared runner, `debian-kind`), so the long-lived NPM_TOKEN secret is the
+# only mechanism available. Revisit if the org moves to GitHub-hosted runners.
+permissions:
+  contents: read
+
+# The org has a single self-hosted runner shared by every repository, so two
+# publishes would otherwise queue behind each other on the same machine.
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Resolve tag
+        id: target
+        env:
+          DISPATCH_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          tag="${DISPATCH_TAG:-${RELEASE_TAG}}"
+          if [ -z "${tag}" ]; then
+            echo "::error::no tag to publish"
+            exit 1
+          fi
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.target.outputs.tag }}
+          fetch-depth: 0
+
+      # Order matters: setup-node resolves the pnpm store path only when pnpm is
+      # already on the PATH. `registry-url` is what writes the .npmrc that reads
+      # NODE_AUTH_TOKEN, and the template's setup-node-project composite does
+      # not accept that input — hence setup-node directly instead of the
+      # composite. Cross-repo refs, never `uses: ./…`: a local path would
+      # resolve against the caller and fail at the setup step.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: '10.18.0'
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify the tag matches the manifest version
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          version="$(node --input-type=commonjs -p "require('./package.json').version")"
+          expected="${TAG#v}"
+          if [ "${version}" != "${expected}" ]; then
+            echo "::error::tag ${TAG} does not match package.json version ${version}"
+            exit 1
+          fi
+          echo "Tag ${TAG} matches package.json version ${version}"
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          set -euo pipefail
+          # An org secret whose visibility does not cover this repository resolves
+          # to an empty string instead of failing, and the 401 only shows up here.
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "::error::NPM_TOKEN resolved to an empty value; check the secret's repository visibility in the sca-templates organization settings"
+            exit 1
+          fi
+          # git-checks=false lives in the repo .npmrc: a tag checkout is a
+          # detached HEAD, which pnpm refuses to publish from.
+          args=(--access public)
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "Dry run: the tarball will be built but not sent to npm"
+            args+=(--dry-run)
+          fi
+          pnpm publish "${args[@]}"

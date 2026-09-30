@@ -1,0 +1,70 @@
+name: Feature request
+description: Propose a module, an export or a tooling improvement
+title: 'feat: '
+labels: ['enhancement']
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: What area does this request affect?
+      options:
+        - new module
+        - new export on an existing module
+        - tooling (lint, test, format, build)
+        - CI or release
+        - docs
+        - process
+        - other
+    validations:
+      required: true
+
+  - type: input
+    id: consumer
+    attributes:
+      label: Consuming repository
+      description: 'Which repository needs this? This package exists so a fix lands once instead of in every service, so the first consumer is the justification.'
+      placeholder: 'sca-users'
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is being duplicated or reinvented today, and where?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-api
+    attributes:
+      label: Proposed surface
+      description: |
+        For a module, sketch the signature. Keep it pure: no I/O, no framework, no business logic.
+        ```ts
+        export function example(input: string): string;
+        ```
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Have you considered keeping this in the consuming service, or an existing dependency?
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: How will we know this is complete?
+      placeholder: 'Exported from src/<name>.ts, subpath added to `exports`, covered by test/<name>.test.ts'
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: This is plumbing or pure code, not business logic
+          required: true
+        - label: Content is in English
+          required: true

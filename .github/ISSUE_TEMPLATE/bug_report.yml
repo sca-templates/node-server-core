@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a problem with the package or with a consuming repository
+title: 'bug: <short description>'
+labels: ['bug']
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the package is affected?
+      options:
+        - public API (a named export)
+        - exports map / resolution
+        - build output (tsup, dts)
+        - types
+        - tooling (lint, test, format, hooks)
+        - CI or release
+        - other
+    validations:
+      required: true
+
+  - type: input
+    id: module
+    attributes:
+      label: Module or export
+      description: 'Which module, subpath or export name does this involve? Leave empty if the package has no API yet.'
+      placeholder: '@sca-templates/node-server-core/errors'
+    validations:
+      required: false
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Package version, Node version and pnpm version
+      placeholder: '0.0.0 / node 22.12.0 / pnpm 10.18.0'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        Paste the output of the command that reproduces it:
+        ```
+        pnpm typecheck && pnpm lint && pnpm test:ci && pnpm build
+        ```
+      render: shell
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: This is a public package — I did not include any token, credential or private URL in the report
+          required: true

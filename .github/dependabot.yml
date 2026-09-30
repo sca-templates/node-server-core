@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # Dependabot uses the `npm` ecosystem for pnpm projects: it detects the
+  # lockfile and runs pnpm. Every dependency here is a devDependency, so the
+  # whole set moves in one reviewable pull request.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '08:00'
+      timezone: America/Bogota
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      dev-dependencies:
+        patterns:
+          - '*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '08:00'
+      timezone: America/Bogota
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns:
+          - '*'
