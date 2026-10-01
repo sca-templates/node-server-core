@@ -52,11 +52,98 @@ body:
     id: proposed-change
     attributes:
       label: Proposed change
-      description: |
-        What should change? For a module or export, sketch the signature. Keep it pure: no I/O, no framework, no business logic.
-```ts
-        export function example(input: string): string;
-```
+      description: 'What should change? For a module or export, sketch the signature. Keep it pure: no I/O, no framework, no business logic.'
+      placeholder: 'export function example(input: string): string;'
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Breaking change?
+      description: Does this alter the behavior or signature of anything already exported?
+      options:
+        - 'No'
+        - 'Yes'
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: Have you considered keeping this in the consuming service, or an existing dependency?
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: How will we know this is complete?
+      placeholder: 'Exported from src/<name>.ts, subpath added to `exports`, covered by test/<name>.test.ts'
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: This is plumbing or pure code, not business logic
+          required: true
+        - label: Content is in English
+          required: truename: Feature or change request
+description: Propose a feature, an update, a refactor or a chore (not for bugs)
+title: 'feat: '
+labels: ['enhancement']
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of change
+      options:
+        - feat (new capability)
+        - update (change to existing behavior)
+        - refactor (no behavior change)
+        - chore (maintenance, dependencies, housekeeping)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: What area does this change affect?
+      options:
+        - new module
+        - existing module
+        - tooling (lint, test, format, build)
+        - CI or release
+        - docs
+        - process
+        - other
+    validations:
+      required: true
+
+  - type: input
+    id: consumer
+    attributes:
+      label: Consuming repository
+      description: 'Which repository needs this? This package exists so a change lands once instead of in every service, so the first consumer is the justification.'
+      placeholder: 'sca-users'
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this needed? What is duplicated, outdated or hard to maintain today, and where?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Proposed change
+      description: 'What should change? For a module or export, sketch the signature. Keep it pure: no I/O, no framework, no business logic.'
+      placeholder: 'export function example(input: string): string;'
 
   - type: dropdown
     id: breaking
