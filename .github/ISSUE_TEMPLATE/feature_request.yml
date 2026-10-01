@@ -1,24 +1,17 @@
-name: Feature request
-description: Propose a module, an export, a change or a tooling improvement (not for bugs)
+name: Feature or change request
+description: Propose a feature, an update, a refactor or a chore (not for bugs)
 title: 'feat: '
 labels: ['enhancement']
 body:
-  - type: markdown
-    attributes:
-      value: |
-        This package exists so a fix lands **once** instead of in every service.
-        Requests must be plumbing or pure code: no business logic, no framework
-        coupling, no hidden I/O. For bugs, please use the bug report template.
-
   - type: dropdown
-    id: request-type
+    id: type
     attributes:
-      label: Request type
+      label: Type of change
       options:
-        - New feature
-        - Change to existing behavior
-        - Refactor or cleanup
-        - Chore (maintenance, dependencies)
+        - feat (new capability)
+        - update (change to existing behavior)
+        - refactor (no behavior change)
+        - chore (maintenance, dependencies, housekeeping)
     validations:
       required: true
 
@@ -26,15 +19,15 @@ body:
     id: area
     attributes:
       label: Area
-      description: What area does this request affect?
+      description: What area does this change affect?
       options:
-        - New module
-        - New export on an existing module
-        - Tooling (lint, test, format, build)
+        - new module
+        - existing module
+        - tooling (lint, test, format, build)
         - CI or release
-        - Docs
-        - Process
-        - Other
+        - docs
+        - process
+        - other
     validations:
       required: true
 
@@ -42,41 +35,34 @@ body:
     id: consumer
     attributes:
       label: Consuming repository
-      description: The first consumer justifies the request. Separate multiple repositories with commas.
+      description: 'Which repository needs this? This package exists so a change lands once instead of in every service, so the first consumer is the justification.'
       placeholder: 'sca-users'
     validations:
       required: true
 
   - type: textarea
-    id: problem
+    id: motivation
     attributes:
-      label: Problem
-      description: What is being duplicated or reinvented today?
+      label: Motivation
+      description: Why is this needed? What is duplicated, outdated or hard to maintain today, and where?
     validations:
       required: true
 
   - type: textarea
-    id: existing-code
+    id: proposed-change
     attributes:
-      label: Existing implementations
-      description: Links to the code that is duplicated today (permalinks to files or PRs).
-      placeholder: |
-        - https://github.com/<org>/<repo>/blob/<sha>/src/utils/example.ts
-        - https://github.com/<org>/<repo>/blob/<sha>/src/helpers/example.ts
-
-  - type: textarea
-    id: proposed-api
-    attributes:
-      label: Proposed surface
-      description: Sketch the signature or the config change. Keep it pure. Leave empty for non-code requests.
-      render: typescript
-      placeholder: 'export function example(input: string): string;'
+      label: Proposed change
+      description: |
+        What should change? For a module or export, sketch the signature. Keep it pure: no I/O, no framework, no business logic.
+```ts
+        export function example(input: string): string;
+```
 
   - type: dropdown
     id: breaking
     attributes:
       label: Breaking change?
-      description: Would this change the behavior or signature of anything already exported?
+      description: Does this alter the behavior or signature of anything already exported?
       options:
         - 'No'
         - 'Yes'
@@ -84,18 +70,11 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: dependencies
-    attributes:
-      label: New runtime dependencies
-      description: List any package this would add to `dependencies` or `peerDependencies`. Write "none" if there are none.
-      placeholder: 'none'
-
   - type: textarea
     id: alternatives
     attributes:
       label: Alternatives
-      description: Did you consider keeping this in the consuming service, or using an existing dependency?
+      description: Have you considered keeping this in the consuming service, or an existing dependency?
 
   - type: textarea
     id: acceptance-criteria
@@ -104,22 +83,11 @@ body:
       description: How will we know this is complete?
       placeholder: 'Exported from src/<name>.ts, subpath added to `exports`, covered by test/<name>.test.ts'
 
-  - type: dropdown
-    id: contribution
-    attributes:
-      label: Are you willing to open the PR?
-      options:
-        - 'Yes'
-        - Yes, with guidance
-        - 'No'
-
   - type: checkboxes
     id: acknowledgements
     attributes:
       label: Acknowledgements
       options:
-        - label: I searched existing issues and this is not a duplicate
-          required: true
         - label: This is plumbing or pure code, not business logic
           required: true
         - label: Content is in English
