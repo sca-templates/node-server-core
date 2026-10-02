@@ -1,0 +1,73 @@
+name: Task
+description: Track a concrete piece of work that needs to be done
+title: 'task: '
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the plan does this task belong to?
+      options:
+        - foundations (errors, config, context, lifecycle)
+        - observability (logging, audit, telemetry)
+        - providers (cache, events, secrets, cloud)
+        - HTTP layer (auth, validation, swagger, http-client)
+        - adapters (express, nestjs)
+        - testing
+        - tooling or CI
+        - docs
+        - process
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What must be done, in one or two sentences?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is it needed? Link the related decision (for example D17) or issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Checklist of the work included. Mention what is explicitly out of scope.
+      placeholder: |
+        - [ ] Item one
+        - [ ] Item two
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: How will we know this is complete?
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Issues, decisions or external work that must happen first.
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: Nothing organization-internal (hostnames, topics, Vault paths) is included, since the package is public
+          required: true
+        - label: Content is in English
+          required: true
