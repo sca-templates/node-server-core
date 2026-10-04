@@ -72,7 +72,7 @@ GitHub setup. Do not implement until the user says planning is done.
 Append an entry at the end of every planning session, in order, without
 renumbering existing ones.
 
-```
+```text
 ### Dxx: <short title>
 - Status: Accepted | Proposed | Superseded by Dyy
 - Decision: <one or two sentences>
@@ -212,7 +212,7 @@ module identity.
 Facts that are expensive to rediscover. Each one has already cost this
 repository a debugging session.
 
-**CI**
+## CI
 
 - `ci.yml` and `release.yml` are thin callers over
   [`sca-templates/CI-CD-Templates`](https://github.com/sca-templates/CI-CD-Templates),
@@ -235,7 +235,7 @@ repository a debugging session.
   push and wait for a real run. A green PR on the template validates files, not
   external consumption.
 
-**Release**
+## Release
 
 - Nothing is published by hand and nobody edits the `version` field.
 - **No release exists yet**: the manifest sits at `0.0.0` with no tag and no
@@ -245,7 +245,7 @@ repository a debugging session.
   `APP_PRIVATE_KEY` must be **organization** secrets with `--visibility all`.
   `gh secret list -R` will not show them.
 
-**Publishing**
+## Publishing
 
 - `NPM_TOKEN` is an organization secret whose visibility must include public
   repositories. `gh secret set --org` defaults to `private`, so for a public repo
