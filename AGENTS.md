@@ -40,18 +40,13 @@ GitHub setup. Do not implement until the user says planning is done.
 
 ### Language rules (strict)
 
-1. **Always reply to the user in Spanish**, using "tú" (tuteo) or neutral forms.
-   Never use "vos" or voseo.
-2. **Everything written for GitHub must be in English**: README files, issue and
+1. **Everything written for GitHub must be in English**: README files, issue and
    pull request titles and bodies, commit messages, labels and their
    descriptions, project board text, release notes, ADRs, CONTRIBUTING and
    script output messages.
-3. **All content inside code blocks must be in English**: comments, identifiers,
+2. **All content inside code blocks must be in English**: comments, identifiers,
    strings and inline docs.
-4. Documents and files meant for the repository or GitHub are written in English
-   even though the conversation is in Spanish. When you deliver one, introduce
-   and explain it in Spanish.
-5. Library names, protocols and technical terms are kept as they are.
+3. Library names, protocols and technical terms are kept as they are.
 
 ### Working style
 
@@ -64,8 +59,6 @@ GitHub setup. Do not implement until the user says planning is done.
   versions.
 - Never invent API surface. If something is undecided, say so and list it as
   open.
-- The user is an experienced Node.js and NestJS developer. Skip beginner
-  explanations.
 - **The user commits and pushes.** Never run `git commit`, `git push`, or any
   other git write, and do not stage, reset or amend. Draft commits and messages
   instead, and ask.
@@ -92,10 +85,12 @@ renumbering existing ones.
 
 ```text
 .
-├── .agents/                # inventory of agents and providers
-├── .claude/                # CLAUDE.md + settings.json (permissions, hooks)
-├── .cursor/mcp.json        # CodeGraph MCP server
-├── .gemini/settings.json   # CodeGraph MCP server
+├── .agents/                # inventory of agents, providers and skills
+│   └── skills/              # canonical skills, read natively by every provider
+├── .claude/                # CLAUDE.md + settings.json; skills/ symlinks to ../.agents/skills
+├── .codex/config.toml       # MCP servers (Codex CLI)
+├── .cursor/mcp.json        # MCP servers
+├── .gemini/settings.json   # MCP servers
 ├── .github/
 │   ├── ISSUE_TEMPLATE/     # bug_report.yml, feature_request.yml, task.yml, config.yml
 │   ├── workflows/
@@ -112,13 +107,13 @@ renumbering existing ones.
 ├── test/                   # vitest suites, one per src/ module; empty today
 ├── .editorconfig
 ├── .lintstagedrc.json      # pre-commit: eslint --fix + prettier
-├── .mcp.json               # CodeGraph MCP server (Claude Code)
+├── .mcp.json               # MCP servers (Claude Code)
 ├── .npmrc                  # git-checks=false
 ├── AGENTS.md               # this file — the source of truth
 ├── GEMINI.md               # CodeGraph block, read by Gemini CLI
 ├── commitlint.config.js    # Conventional Commits rules
 ├── eslint.config.js        # flat config; ignores root *.config.js / *.config.mjs
-├── opencode.jsonc          # CodeGraph MCP server (opencode)
+├── opencode.jsonc          # MCP servers (opencode)
 ├── package.json            # scripts, exports, publishConfig, pnpm overrides
 ├── pnpm-workspace.yaml     # ignoredBuiltDependencies only — single package
 ├── tsconfig.json           # type-check only; must list every linted *.config.ts
@@ -147,7 +142,8 @@ full script list and what each one does is in [README.md](README.md#scripts).
 
 `pnpm test:ci` passes with **zero test files** until the first module exists.
 That is `passWithNoTests` in `vitest.config.ts`, not a broken suite: read the
-line count before concluding the tests pass.
+line count before concluding the tests pass. There are **no coverage
+thresholds** for the same reason; add them with the first module, not before.
 
 There is **no `actionlint` in CI** and no markdown linter wired locally. If you
 touch `.github/workflows/`, validate by hand with
@@ -184,10 +180,9 @@ These are decided. Implement against them; do not relitigate them.
 | D04 | `AppError` base with a stable code; RFC 9457 problem details on the wire                                | Exactly one error-to-response translation point per adapter.                                                                                                                                                                                  |
 | D05 | Env vars drive configuration, validated with Zod via `loadConfig(schema)`                               | Env var names are public API. Options override the environment. Nothing reads env at import time.                                                                                                                                             |
 | D06 | Framework-agnostic core, thin adapters at `/express` and `/nest`                                        | Express and NestJS are optional peer dependencies.                                                                                                                                                                                            |
-| D07 | `@confluentinc/kafka-javascript` behind a thin interface                                                | Ships a **native binary**: verify glibc vs musl prebuilds. TLS and SASL from options or env.                                                                                                                                                  |
+| D07 | Kafka is reached only through the events port; no client type crosses the public API                    | Consumers import `…/providers/kafka`; the client is an optional peer dependency (D16) and never appears in a core module. Which client it is gets decided in phase 3.                                                                         |
 | D08 | Vitest for everything, Testcontainers for integration                                                   | Vitest/esbuild emits no decorator metadata, so NestJS adapter tests need an SWC plugin.                                                                                                                                                       |
 | D09 | Public on npm; published versions are immutable                                                         | Nothing organization-internal may appear in the package or its docs.                                                                                                                                                                          |
-| D10 | ~~No linting in this repository~~                                                                       | Superseded by D20.                                                                                                                                                                                                                            |
 | D11 | Kafka is self-hosted on Kubernetes                                                                      | TLS and SASL must be configurable; credentials may come from the secrets provider.                                                                                                                                                            |
 | D12 | The library **verifies** JWTs (JWKS cache and rotation, issuer, audience, expiry, algorithm allow-list) | No token issuance, no login flows. The JWT library must work from CJS.                                                                                                                                                                        |
 | D13 | OpenTelemetry through `@opentelemetry/api` only                                                         | The app picks the SDK and exporters. In ESM, instrumentation must load before app code.                                                                                                                                                       |
@@ -197,21 +192,6 @@ These are decided. Implement against them; do not relitigate them.
 | D17 | Dual ESM and CJS build                                                                                  | **Dual package hazard**: brand errors with `Symbol.for`, keep shared state on `globalThis` under `Symbol.for` keys, never trust `instanceof`. No top-level `await`. Every runtime dep must load from CJS. Validate with `publint` and `attw`. |
 | D18 | Ports and adapters for cache, events and secrets                                                        | Interfaces stay small enough for every provider; provider extensions live outside the contract.                                                                                                                                               |
 | D19 | AWS, Azure and GCP support via each cloud's standard credential chain                                   | Application Default Credentials on GCP, and the equivalents elsewhere.                                                                                                                                                                        |
-| D20 | This repo lints and formats itself                                                                      | See below.                                                                                                                                                                                                                                    |
-
-### D20: Quality gates in this repository
-
-- **Status:** Accepted (supersedes D10)
-- **Decision:** the repository does lint and format itself: ESLint 10 flat
-  config, Prettier, commitlint, Husky and lint-staged. The gates are
-  `pnpm typecheck`, `pnpm test:ci`, `pnpm lint` and `pnpm format:check`.
-- **Rationale:** D10 predates the pipeline; the tooling landed afterwards. D10's
-  intent survives — consuming projects still lint their own code, and what npm
-  publishes is the `dist/` bundle tsup produced.
-- **Consequences:** `eslint-config-prettier` is loaded, so formatting is never an
-  ESLint error. Root `*.config.js` / `*.config.mjs` are excluded on purpose. An
-  agent runs the four gates before calling a change green.
-- **Open points:** coverage thresholds, still none until code exists.
 
 ### D17 in practice
 
@@ -335,6 +315,10 @@ request context.
   limiting, security headers.
 - API standards: response format, pagination, endpoint versioning, idempotency.
 - Test utilities for consumers (a `/testing` entry with mocks and helpers).
+- The Kafka/BullMQ boundary: when a service reaches for which of the two, and
+  whether Kafka serves only the events port or also cache invalidation and
+  request-response. Both land in phase 3, which is also where D07 defers the
+  choice of Kafka client.
 - Per-module design: Vault auth methods and renewal; Kafka serialization, retries
   and dead-letter handling; BullMQ connection sharing and context propagation;
   HTTP client retries, mesh-coherent timeouts and token propagation; cloud

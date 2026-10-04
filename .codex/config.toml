@@ -1,0 +1,11 @@
+# Project-scoped Codex configuration. Codex loads this layer only for trusted
+# projects, and ignores provider, auth, notify, profile and telemetry keys here.
+# Keep MCP servers only; everything personal belongs in ~/.codex/config.toml.
+
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_TOKEN"
