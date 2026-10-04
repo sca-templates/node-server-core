@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  // Canonical skills, shared with Codex, Gemini and Cursor by native discovery.
+  "skills": [".agents/skills"],
+  // MCP servers (repo-local, self-contained).
+  "mcp": {
+    "codegraph": {
+      "type": "local",
+      "command": ["codegraph", "serve", "--mcp"],
+      "enabled": true,
+    },
+    // GitHub's remote MCP server. Reads the token from GITHUB_TOKEN; it adds a lot
+    // of tools, so narrow it with X-MCP-Toolsets or disable it if context is tight.
+    "github": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_TOKEN}",
+      },
+    },
+  },
+}
