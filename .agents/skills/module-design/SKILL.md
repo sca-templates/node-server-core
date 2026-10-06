@@ -13,9 +13,8 @@ Design it before writing it, and get the user to approve the contract before imp
 Read `AGENTS.md` and, from it:
 
 - the **scope table** to know which area the module belongs to and what the non-goals are;
-- the **decision table** (D01–D19) for the constraints already decided — Zod 4, the Pino-free
-  logger interface, `AsyncLocalStorage` context, `AppError` with RFC 9457, env-driven config,
-  framework-agnostic core, dual ESM and CJS, ports and adapters.
+- the **decision table** for the constraints already decided, and the detailed entries
+  that follow it — read the table itself rather than a remembered range;
 
 Do not relitigate a decided item. If one looks wrong, say so and propose a new decision
 entry instead of quietly ignoring it.

@@ -52,6 +52,7 @@ tooling|c2e0c6|Build (tsup), CI, Release Please, publishing and developer toolin
 design|1d76db|Planning, API design or an ADR; produces a decision or spec, not code
 needs decision|fbca04|Blocked until an open design decision is made; add the options in the thread
 blocked|24292f|Cannot progress: waiting on another issue, PR, external service or person
+types|bfd4f2|Shared types, helpers and constants: naming conventions for the public surface
 errors|bfd4f2|Error model: AppError hierarchy, stable codes and RFC 9457 problem details
 config|bfd4f2|Configuration loading and validation, environment variables and per-module options
 context|bfd4f2|Request context via AsyncLocalStorage: user, tenant and trace data propagation
