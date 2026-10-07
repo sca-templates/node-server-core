@@ -207,6 +207,9 @@ These are decided. Implement against them; do not relitigate them.
 | D25 | One independently decidable question per sub-issue                                                      | A parent issue is an area container, not a work item. It holds the constraints already decided and a list of sub-issues; it is `Decided` when all of them are. Twelve narrow areas stay whole. No code impact.                                |
 | D26 | Cache invalidation happens at the write site; the cached representation is versioned separately         | No staleness probe on the read path and no push invalidation. A cached entry carries a version of the shape it was written under, so a schema change cannot be read as current. The key _layout_ stays in #62.                                |
 | D27 | Managed cloud equivalents for every ported component                                                    | Each of D18's three ports has an AWS, Azure and GCP counterpart; where none exists the portability matrix says so instead of failing silently. Provider choice and failover belong to the consuming team. Built last, in phase 5.             |
+| D28 | Error codes are dotted namespaces resolved through a frozen registry                                    | Refines D04. Feeds D29's `type` URI and the OpenAPI document. An unregistered code still ships with status 500, and there is no registration function, so D16 is untouched.                                                                   |
+| D29 | Problem `type` is a dereferenceable URL under the documentation path                                    | Refines D04 and consumes D28's code. `cause` never crosses the wire and `details` only when the error sets it. The error pages must exist before the first publish.                                                                           |
+| D30 | Unknown errors are normalized once, at the translation point                                            | Refines D04 into one call that normalizes and serializes, which is what makes "exactly one translation point" enforceable. `retryable` is explicit and defaults to `false`.                                                                   |
 
 ### D17 in practice
 
@@ -388,6 +391,64 @@ roadmap`, `Backlog`) still carry delivery names. The Projects v2 API does not
   behaviour of Event Hubs; and the command surface each managed Redis exposes,
   which decides whether BullMQ can run on it. All three are in #104, #105 and #106.
 
+### D28: Error codes are dotted namespaces resolved through a frozen registry
+
+- Status: Accepted
+- Decision: an error code is a lowercase dotted namespace — `cache.timeout`,
+  `internal.unexpected` — resolved against a frozen `errorCodes` record that maps it
+  to an HTTP status and a default message. An unregistered code still ships with a
+  status of 500. There is no registration function: a library module adds a code by
+  editing the record, and anything outside the package passes `status` explicitly.
+- Rationale: a namespace per module makes the record the single place where a code
+  acquires a status and a message, and the dotted form survives in a log line where
+  `CACHE_TIMEOUT` would not be obviously the same identifier. A `registerErrorCode()`
+  would have to run as a side effect of importing the module, which D16 forbids, and
+  would make two applications in one process disagree about the same code.
+- Consequences: refines D04 and feeds D29's `type` URI and the generated OpenAPI
+  document. The record is public API the moment it ships (D09), so a code never
+  changes meaning and a status never moves. The library owns `internal.`; each module
+  owns its own namespace.
+- Open points: none.
+
+### D29: Problem `type` is a dereferenceable URL under the documentation path
+
+- Status: Accepted
+- Decision: `type` is `<typeBase>/<code>`, with `typeBase` defaulting to
+  `https://github.com/sca-templates/node-server-core/blob/main/docs/errors/`, and
+  `about:blank` when the base is empty. `detail` carries `error.message`, `title`
+  carries the registry message, and `details` appears only when the error set it.
+  `cause` and the whole chain never cross the wire.
+- Rationale: RFC 9457 exists so a client can look the type up, and a URN denies it
+  that. The base is permanent once published (D09), so a repository blob URL was
+  chosen over a documentation host that may be re-hosted: it survives a repository
+  transfer and carries no internal hostname. An application whose documentation lives
+  elsewhere passes `typeBase` once at its translation point, which keeps D16's
+  explicit-options-first rule.
+- Consequences: refines D04 and consumes D28's code. `code` and `retryable` are
+  emitted alongside `type` as extension members, so a client can switch without
+  dereferencing anything.
+- Open points: every referenced page must exist before the first publish, which makes
+  the error pages a dependency of #32 and #19.
+
+### D30: Unknown errors are normalized once, at the translation point
+
+- Status: Accepted
+- Decision: a single `toProblemResponse` accepts `unknown`, wraps anything that is
+  not an `AppError` into `internal.unexpected` with the original as `cause`, and
+  returns the status and the body together. `normalizeAppError` is exported
+  separately for paths that have no HTTP response. `retryable` is a boolean set
+  explicitly by whoever throws, defaulting to `false`.
+- Rationale: one function that normalizes and serializes is what makes D04's "exactly
+  one translation point" enforceable rather than aspirational, and a single wrapping
+  rule means no adapter can invent its own. Deriving `retryable` from the HTTP status
+  is wrong for providers, where a 503 is retryable and a validation failure is not.
+- Consequences: refines D04. The wrapper's message is generic, so nothing from a
+  driver or an SDK reaches the client, and the original survives in `cause` for the
+  log chain. The cache, cloud and HTTP client work maps third-party errors into this
+  contract.
+- Open points: walking the `cause` chain for the log record is left to the logging
+  module (#8); no walker is exported until something consumes it.
+
 ## Load-bearing facts
 
 Facts that are expensive to rediscover. Each one has already cost this
@@ -486,8 +547,9 @@ Across all phases: an example app as first consumer, unit tests everywhere,
 integration tests with real services in containers, `publint` and `attw` checks
 for the dual build, Conventional Commits from the first change.
 
-**Next step:** detail the foundations in this order — errors (#2), configuration
-(#3), request context (#4).
+**Next step:** the error model (#2) is decided — D28 to D30 amend D04 and the design
+sits on the issue — so the first code is `src/errors/`. Then continue the
+foundations with configuration (#3) and request context (#4).
 
 Every design topic below is tracked as an issue in
 [Project 3](https://github.com/orgs/sca-templates/projects/3) with
