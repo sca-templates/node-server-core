@@ -11,7 +11,8 @@ body:
         - foundations (errors, config, context, lifecycle)
         - observability (logging, audit, telemetry)
         - providers (cache, events, secrets, cloud)
-        - HTTP layer (auth, validation, swagger, http-client)
+        - HTTP client (axios, retries, timeouts)
+        - HTTP layer (auth, validation, swagger, guards)
         - adapters (express, nestjs)
         - testing
         - tooling or CI
