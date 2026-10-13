@@ -38,18 +38,18 @@ jobs:
   # context that the branch ruleset requires.
   release-gate:
     if: github.event_name == 'pull_request'
-    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-qa-lock-check.yml@47b9f3cb040adb8095585511a78c0f3a15079489 # v3.3.1
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-qa-lock-check.yml@e203b26bdc2a05e91715dd411faf9f6a9181a25b # v3.4.0
 
   security:
-    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-security-scan.yml@47b9f3cb040adb8095585511a78c0f3a15079489 # v3.3.1
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-security-scan.yml@e203b26bdc2a05e91715dd411faf9f6a9181a25b # v3.4.0
 
   codeql:
-    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-codeql.yml@47b9f3cb040adb8095585511a78c0f3a15079489 # v3.3.1
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-codeql.yml@e203b26bdc2a05e91715dd411faf9f6a9181a25b # v3.4.0
     with:
       languages: '["javascript-typescript"]'
 
   stack:
-    uses: sca-templates/CI-CD-Templates/.github/workflows/stack-node-ts.yml@47b9f3cb040adb8095585511a78c0f3a15079489 # v3.3.1
+    uses: sca-templates/CI-CD-Templates/.github/workflows/stack-node-ts.yml@e203b26bdc2a05e91715dd411faf9f6a9181a25b # v3.4.0
     with:
       node-version: '22'
       package-manager: pnpm
