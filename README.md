@@ -80,7 +80,8 @@ import { something } from '@sca-templates/node-server-core/errors';
 
 ## CI
 
-`ci.yml`, `release.yml` and `publish.yml` are thin callers over
+`ci.yml`, `release.yml`, `publish.yml`, `validate.yml`, `auto-label.yml` and
+`notify.yml` are thin callers over
 [`sca-templates/CI-CD-Templates`](https://github.com/sca-templates/CI-CD-Templates),
 pinned to a full commit SHA. A push to `main` gates on:
 
@@ -92,6 +93,9 @@ stack / Build
 stack / Format
 stack / Lint
 stack / Test
+Validate / Markdown
+Validate / Workflow lint (actionlint)
+Validate / YAML and Shell
 ```
 
 ## Release and publishing

@@ -1,0 +1,21 @@
+# yamllint configuration — relaxed line length, strict structure.
+# `document-start` is disabled so both the `---`-prefixed GitHub workflow files
+# and the plain YAML here lint cleanly.
+extends: default
+
+rules:
+  line-length:
+    max: 160
+  comments:
+    min-spaces-from-content: 1
+  document-start: disable
+  truthy:
+    check-keys: false
+  indentation:
+    spaces: 2
+
+ignore: |
+  node_modules/
+  dist/
+  coverage/
+  pnpm-lock.yaml

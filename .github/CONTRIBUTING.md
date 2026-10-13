@@ -16,7 +16,7 @@
 ```text
 src/                     One file per module; each is a tsup entry and needs an `exports` subpath
 test/                    Vitest suites, mirroring src/
-.github/workflows/       ci.yml | release.yml | publish.yml — thin callers over CI-CD-Templates
+.github/workflows/       ci.yml | release.yml | publish.yml | validate.yml | auto-label.yml | notify.yml — thin callers over CI-CD-Templates
 .github/                 Dependabot, CODEOWNERS, PR and issue templates
 .npmrc                   git-checks=false, so a detached-HEAD CI build can publish
 package.json             Scripts, exports map, publishConfig, pnpm overrides
@@ -69,7 +69,7 @@ pnpm build           # tsup into dist/
 
 The `pre-commit` hook runs `lint-staged` (ESLint `--fix` + Prettier) on staged files; `commit-msg` runs `commitlint`. Both are installed by `pnpm install`.
 
-There is no `actionlint` in CI and no markdown linter wired locally. If you touch `.github/workflows/`, validate with `actionlint .github/workflows/*.yml`.
+`validate.yml` runs markdown lint plus link check, yamllint with shell syntax, and `actionlint` over the workflows. Locally, `actionlint .github/workflows/*.yml` still catches a typo before the push.
 
 ## Releases
 

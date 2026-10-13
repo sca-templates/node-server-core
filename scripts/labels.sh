@@ -37,6 +37,9 @@ done
 read -r -d '' LABELS <<'EOF' || true
 accessibility|f29513|Barrier for people with disabilities, e.g. in docs, Swagger UI or readable error messages
 bug|d73a4a|Something is broken: incorrect behavior, crash or regression in a module
+feature|a2eeef|New user-visible capability; the bot applies it to a feat: pull request
+ci|c2e0c6|Changes to the GitHub Actions workflows, CI pipelines and shared automation
+refactor|d4c5f9|Internal restructuring with no change to the public behavior
 documentation|0075ca|Improvements or additions to the README, module docs, API reference or examples
 duplicate|cfd3d7|This issue or pull request already exists; link the original and close this one
 enhancement|a2eeef|New feature or improvement to an existing module (non-breaking)
@@ -74,6 +77,7 @@ secrets|d4c5f9|Secrets abstraction and providers: Vault, AWS Secrets Manager, Az
 aws|ffcc99|AWS support: credentials and region resolution, IAM-based auth and AWS service adapters
 azure|ffcc99|Azure support: identity and tenant resolution, managed identity and Azure service adapters
 gcp|ffcc99|GCP support: Application Default Credentials, service accounts and Google Cloud adapters
+node|bfdadc|Node.js runtime, package build and the shared Express/NestJS adapters
 express|bfdadc|Express adapter: app bootstrap, middlewares and error handler
 nestjs|bfdadc|NestJS adapter: module, guards, interceptors, filters and decorators
 testing|ededed|Test strategy, Testcontainers integration tests and the /testing helpers entry

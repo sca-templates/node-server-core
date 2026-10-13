@@ -1,0 +1,18 @@
+{
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD024": false,
+    "MD025": false,
+    "MD033": false,
+    "MD060": false,
+  },
+  "ignores": [
+    "0.Project_info/**",
+    "context/**",
+    "**/node_modules/**",
+    "dist/**",
+    "coverage/**",
+    "CHANGELOG.md",
+  ],
+}
