@@ -1,0 +1,9 @@
+{
+  "ignorePatterns": [
+    { "pattern": "^#" },
+    { "pattern": "^https://github\\.com/orgs/sca-templates/projects" }
+  ],
+  "retryOn429": true,
+  "retryCount": 3,
+  "aliveStatusCodes": [200, 203, 206, 500, 502, 503, 504]
+}

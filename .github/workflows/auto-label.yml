@@ -1,0 +1,30 @@
+---
+name: Auto label
+
+# Thin wrapper over the org shared template
+# (CI-CD-Templates/.github/workflows/shared-auto-label.yml, SHA-pinned): labels
+# PRs from the Conventional Commits type and the changed files. `stack-labels`
+# is on so the `node` label is applied; `ensure-labels` keeps the global label
+# set present. The label source of truth for this repo stays scripts/labels.sh,
+# which now also declares the feature/ci/refactor/node labels the bot creates.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+# No top-level `concurrency`: the shared template declares its own.
+
+jobs:
+  label:
+    name: Auto label
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-auto-label.yml@684819efa838ed7f653723f9f58ed18c48697b37 # v3.5.0
+    with:
+      type-labels: true
+      stack-labels: true
+      ensure-labels: true

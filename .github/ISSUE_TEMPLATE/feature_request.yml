@@ -35,7 +35,9 @@ body:
     id: consumer
     attributes:
       label: 'Consuming repository'
-      description: 'Which repository needs this? This package exists so a change lands once instead of in every service, so the first consumer is the justification.'
+      description: >-
+        Which repository needs this? This package exists so a change lands once
+        instead of in every service, so the first consumer is the justification.
       placeholder: 'sca-users'
     validations:
       required: true

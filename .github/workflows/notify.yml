@@ -1,0 +1,35 @@
+---
+name: Notify
+
+# Thin wrapper over the org shared template
+# (CI-CD-Templates/.github/workflows/shared-changelog-notify.yml, SHA-pinned):
+# posts the release notes to a Slack or Discord webhook. When WEBHOOK_URL is
+# unset the notification is skipped silently, so the workflow is inert until the
+# secret is configured.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Notification platform (slack or discord)'
+        type: choice
+        options: [slack, discord]
+        default: slack
+      summary-lines:
+        description: 'Number of non-empty release note lines to include (0 = full body)'
+        type: number
+        default: 7
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Notify release
+    uses: sca-templates/CI-CD-Templates/.github/workflows/shared-changelog-notify.yml@684819efa838ed7f653723f9f58ed18c48697b37 # v3.5.0
+    with:
+      platform: ${{ inputs.platform || 'slack' }}
+      summary-lines: ${{ inputs.summary-lines || 7 }}
+    secrets:
+      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}

@@ -101,9 +101,12 @@ renumbering existing ones.
 ├── .github/
 │   ├── ISSUE_TEMPLATE/     # bug_report.yml, feature_request.yml, task.yml, config.yml
 │   ├── workflows/
+│   │   ├── auto-label.yml  # caller of shared-auto-label
 │   │   ├── ci.yml          # caller of the shared CI workflows
-│   │   ├── publish.yml     # npm publish, on `release: published`
-│   │   └── release.yml     # caller of shared-release-flow
+│   │   ├── notify.yml      # caller of shared-changelog-notify
+│   │   ├── publish.yml     # caller of stack-npm-publish, on `release: published`
+│   │   ├── release.yml     # caller of shared-release-flow
+│   │   └── validate.yml    # caller of shared-validate
 │   ├── CODEOWNERS
 │   ├── CONTRIBUTING.md
 │   ├── PULL_REQUEST_TEMPLATE.md
@@ -152,9 +155,9 @@ That is `passWithNoTests` in `vitest.config.ts`, not a broken suite: read the
 line count before concluding the tests pass. There are **no coverage
 thresholds** for the same reason; add them with the first module, not before.
 
-There is **no `actionlint` in CI** and no markdown linter wired locally. If you
-touch `.github/workflows/`, validate by hand with
-`actionlint .github/workflows/*.yml`.
+`.github/workflows/*.yml` is linted in CI now, by `validate.yml`: markdown lint
+plus link check, yamllint with shell syntax, and `actionlint`. Locally the same
+`actionlint .github/workflows/*.yml` still catches a typo before the push.
 
 ## Conventions
 
@@ -456,10 +459,12 @@ repository a debugging session.
 
 ## CI
 
-- `ci.yml` and `release.yml` are thin callers over
+- `ci.yml`, `release.yml`, `publish.yml`, `validate.yml`, `auto-label.yml` and
+  `notify.yml` are thin callers over
   [`sca-templates/CI-CD-Templates`](https://github.com/sca-templates/CI-CD-Templates),
-  pinned to a full commit SHA. `publish.yml` is local: the template has no npm
-  path at all.
+  pinned to a full commit SHA. There is no repo-local CI logic left: the npm
+  publish path that used to live here now delegates to `stack-npm-publish.yml`
+  (added to the template in v3.5.0).
 - **Caller permissions are a ceiling.** GitHub validates the declared permissions
   of every job in the called workflow against the caller's grants while building
   the run graph, including jobs gated behind `false`. A missing grant fails the
@@ -473,9 +478,9 @@ repository a debugging session.
   (`release / Sign release tag`, `stack / Publish Docker image`) must never be
   made required in a branch ruleset.
 - To bump the template pin: read the target tag, confirm the reusable workflows
-  and composite actions exist **in that tree**, update all five references, then
-  push and wait for a real run. A green PR on the template validates files, not
-  external consumption.
+  and composite actions exist **in that tree**, update every reference across the
+  six caller workflows, then push and wait for a real run. A green PR on the
+  template validates files, not external consumption.
 
 ## Release
 
@@ -492,7 +497,8 @@ repository a debugging session.
 - `NPM_TOKEN` is an organization secret whose visibility must include public
   repositories. `gh secret set --org` defaults to `private`, so for a public repo
   it resolves to an empty string, not an error: the job installs, builds, and
-  fails at publish with a bare `401`. `publish.yml` asserts it is non-empty.
+  fails at publish with a bare `401`. `stack-npm-publish.yml` asserts it is
+  non-empty; `publish.yml` only forwards the secret.
 - The token is a granular npm token limited to the `@sca-templates` scope with
   `bypass_2fa`, and it **expires in 90 days**. Rehearse a rotation with the
   `dry-run` input on `publish.yml`.
@@ -502,10 +508,10 @@ repository a debugging session.
   self-hosted runners, which is what `vars.RUNS_ON` resolves to here.
 - **Never trigger on `push: tags`.** `sign-tag` re-pushes the tag to sign it, so
   a tag trigger fires a second publish for a version npm already accepted.
-- `publish.yml` does not reuse the template's `setup-node-project` composite: it
-  has no `registry-url` input, so it never writes the `.npmrc` that reads
-  `NODE_AUTH_TOKEN`. It calls `pnpm/action-setup` then `actions/setup-node`, in
-  that order.
+- `publish.yml` is a thin caller of `stack-npm-publish.yml`: the template runs
+  `pnpm/action-setup` then `actions/setup-node` with `registry-url`, so the
+  `.npmrc` that reads `NODE_AUTH_TOKEN` is written there and the tag is checked
+  against `package.json` before publishing.
 
 ## Planning state
 
@@ -614,6 +620,9 @@ Progress` or `Deployed`.
   else — that script is the source of truth. Run it with `--dry-run` first. It
   creates or updates every label, then deletes any label outside the set except
   `autorelease:*`. Flags: `--dry-run`, `--yes`, and an optional `owner/repo`.
+  The `Auto label` workflow only _applies_ labels from that set (its
+  `feature`/`ci`/`refactor`/`node` outputs are declared here too), so it never
+  introduces a label the script would delete.
 - A planning item carries the `design` label plus the label of the area it
   touches. `needs decision` means blocked on an open question, with the options
   in the thread.
